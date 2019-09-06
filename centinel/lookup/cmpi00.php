@@ -69,4 +69,5 @@ curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 $result = curl_exec($ch);
 curl_close ($ch);
 echo $result;
+
 ?>
