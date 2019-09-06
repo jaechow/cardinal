@@ -93,7 +93,7 @@ $cmpi_lookup = <<<XML
     <BrowserTimeZone>25200</BrowserTimeZone>
     <CardExpMonth>02</CardExpMonth>
     <CardExpYear>2024</CardExpYear>
-    <CardNumber>4000000000000002</CardNumber>
+    <CardNumber>4000000000001092</CardNumber>
     <CurrencyCode>840</CurrencyCode>
     <DFReferenceId>c17dea31-9cf6-0c1b8f2d3c5</DFReferenceId>
     <DeviceChannel>browser</DeviceChannel>
