@@ -61,13 +61,13 @@ The following example will help provide a conceptual demonstration of the cmpi_l
 ```PHP
 <?php
 
-$timestamp = round(microtime(true) * 1000);
+$Timestamp = round(microtime(true) * 1000);
 $ApiKey = '754be3dc-10b7-471f-af31-f20ce12b9ec1';
 $ApiId = '582e0a2033fadd1260f990f6';
 $OrgUnit = '582be9deda52932a946c45c4';
 $preHash = $timestamp.$apiKey;
 $hashed = hash("sha256", $preHash, true);
-$signature = base64_encode($hashed);
+$Signature = base64_encode($hashed);
 $cmpi_lookup = <<<XML
 <CardinalMPI>
     <Algorithm>SHA-256</Algorithm>
