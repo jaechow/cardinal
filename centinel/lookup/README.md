@@ -45,7 +45,7 @@ $apiKey = '13f1fd1b-ab2d-4c1f-8e2c-ca61878f2a44';
 $preHash = $timestamp.$apiKey;
 
 # Next, hash the concatenated value.
-# For this example let's use hash256:
+# For this example let's use the sha256 algorithm:
 $hashed = hash("sha256", $preHash, true);
 
 # Last, base64 encode the result:
