@@ -3,4 +3,5 @@
 
 # What's New
 
-Check out the [cmpi_lookup](centinel/lookup/) repository and learn how to properly format the `cmpi_lookup` request with an API Key.
+- Just added the [Cardinal Cruise Standard Tutorial](cruise/standard/) directory.
+- Check out the [cmpi_lookup](centinel/lookup/) directory and learn how to properly format the `cmpi_lookup` request with an API Key.
