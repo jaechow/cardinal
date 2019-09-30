@@ -205,7 +205,7 @@ $jwt = generate_cruise_jwt($_SESSION['payload']);
                     console.warn('%cConsumer Authentication should be considered incompleted.  Do not proceed to Authorization.','color:red');
                 }
             } else {
-                console.warn('Consumer Authentication Failed.');
+                console.warn('%cConsumer Authentication Failed.', 'color:white; background-color:red');
             }
         });
     function psd2Payment(){
