@@ -192,14 +192,14 @@ Cardinal.setup("init", {
 ```
 ## BIN Detection
 
-There are two recommended path based on need.  If the card holders will always type their own card number (PAN will always originate from client front-end) the [field decorator](https://cardinaldocs.atlassian.net/wiki/spaces/CC/pages/311984510/BIN+Detection#BINDetection-Style1-FieldDecorator) is recommended:
+There are two recommended paths based on merchant need.  If the card holder's always type their own card number (PAN will always originate from client front-end) the [field decorator](https://cardinaldocs.atlassian.net/wiki/spaces/CC/pages/311984510/BIN+Detection#BINDetection-Style1-FieldDecorator) is recommended:
 
 ```html
 <input name="customer_credit_card_number" id="customer_credit_card_number" data-cardinal-field="AccountNumber" type="text" class="form-control"  />
 ```
 
 If the payment instrument is tokenized or otherwise vaulted, the BIN (first 6 to 8 digits of the PAN) will need to be returned by the merchant to the client front-end at which point the `bin.process` trigger may initiate.
-Here, in this tutorial, the `bin.process` trigger is the controller for the `Cardinal.start()` function.
+Here, in this tutorial, the `bin.process` trigger is the controller for the `Cardinal.start()` function.  It should also be pointed out: for the purpose of this tutorial, both styles have been employed.  This is unnecessary in production.
 
 ```javascript
 Cardinal.trigger("bin.process", bin).then(function(results){
