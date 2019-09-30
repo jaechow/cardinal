@@ -192,7 +192,7 @@ Cardinal.setup("init", {
 ```
 ## BIN Detection
 
-There are two recommended paths based on merchant need.  If the card holder's always type their own card number (PAN will always originate from client front-end) the [field decorator](https://cardinaldocs.atlassian.net/wiki/spaces/CC/pages/311984510/BIN+Detection#BINDetection-Style1-FieldDecorator) is recommended:
+There are two recommended paths based on merchant need.  If the card holders always type their own card number (PAN will always originate from client front-end) the [field decorator](https://cardinaldocs.atlassian.net/wiki/spaces/CC/pages/311984510/BIN+Detection#BINDetection-Style1-FieldDecorator) is recommended:
 
 ```html
 <input name="customer_credit_card_number" id="customer_credit_card_number" data-cardinal-field="AccountNumber" type="text" class="form-control"  />
