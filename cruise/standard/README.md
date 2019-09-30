@@ -267,7 +267,7 @@ if(results.Status){
 
 ## Handling Cardinal Consumer Authentication Response
 
-For this rudimentary tutorial, the return values for `ECIFlag` and `Enrolled` drive the logic that controls the browser console notifications.
+For this rudimentary tutorial, the return values for `ECIFlag` and `Enrolled` drive the logic that controls the browser console notifications.  Taking the next step should involve logic to evaluate the return value `ActionCode`.
 
 ```javascript
 Cardinal.on('payments.validated', function(decodedResponseData, responseJWT){
