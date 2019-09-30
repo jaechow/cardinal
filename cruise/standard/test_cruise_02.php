@@ -1,5 +1,6 @@
 <?php
 // API Credentials
+// Replace the following values between the '' marks with your own:
 $cardinalApiKey = '754be3dc-10b7-471f-af31-f20ce12b9ec1';
 $cardinalApiIdentifier = '582e0a2033fadd1260f990f6';
 $cardinalApiOrgUnitId = '582be9deda52932a946c45c4';
