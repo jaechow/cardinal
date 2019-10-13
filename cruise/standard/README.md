@@ -90,7 +90,7 @@ function generate_cruise_jwt($payload) {
         'OrgUnitId' => $cardinalApiOrgUnitId,
     );
     // This is important: the CurrencyCode is required in the JWT Payload:
-    $payload = 
+ 
     $data['Payload'] = $payload;
     $data['ObjectifyPayload'] = true;
     $_SESSION['jwtClaims'] = $data;
