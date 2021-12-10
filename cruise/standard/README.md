@@ -14,7 +14,7 @@ This tutorial and guide will supplement the Cardinal Cruise [Standard Implementa
 
 ## Generating the JWT
 
-First a payload is generated then the JWT claims are established and everthing is passed to the function, `generate_cruise_jwt` that performs the encryption.
+First a payload is generated, then the JWT claims are established and everthing is passed to the function: `generate_cruise_jwt` that performs the encryption.
 A few keys to keep in mind:
 
 - To build a proper JWT Payload the following values are minimally required:
@@ -118,7 +118,7 @@ $jwt = generate_cruise_jwt($_SESSION['payload']);
 
 ## Include the Script
 
-This will likely be the quickest step.  Add the Songbird javascript to the page.
+Paste the Songbird javascript to the checkout page.
 
 ```html
 <script src="https://songbirdstag.cardinalcommerce.com/cardinalcruise/v1/songbird.js"></script>
@@ -137,6 +137,7 @@ Cardinal.configure({
         timeout: 8000
     });
 ```
+
 ## Listen for Events
 
 The `Cardinal.on` function sets up event subscriptions.  This helps control sequencing of functions with events.
@@ -148,6 +149,7 @@ Cardinal.on("payments.setupComplete", function () {
 console.log('%cConsumer Authentication Setup Complete.', 'color:green; background-color:LightGreen;');
 });
 ```
+
 Here, again for the purpose of this tutorial, the `payments.validated` event subscription will trigger notifications in the browser console.  First, a check is made whether `Validated` exists in the response data, `decodedResponseData`.  If so, a second check is made for `ECIFlag` and `Enrolled` values.  If either of the conditions are met, the console logs the event and confirms that Consumer Authentication has successfully completed.
 If `ECIFlag`  is any other value while `Validated` is still true, a console log entry will be made to confirm the Consumer Authentication is complete however no benefits or liablity shift will apply.  Last, if `Validated` is false a log entry will be made to confirm that Consumer Authentication failed.
 
@@ -184,12 +186,15 @@ var jwt = document.getElementById("JWTContainer").value;
 //console.log('jwt is: '+jwt);
 
 ```
+
 The `jwt` variable is sent in the `Cardinal.setup('init')` function.
+
 ```javascript
 Cardinal.setup("init", {
     jwt: jwt
 });
 ```
+
 ## BIN Detection
 
 There are two recommended paths based on merchant need.  If the card holders always type their own card number (PAN will always originate from client front-end) the [field decorator](https://cardinaldocs.atlassian.net/wiki/spaces/CC/pages/311984510/BIN+Detection#BINDetection-Style1-FieldDecorator) is recommended:
@@ -247,6 +252,7 @@ var order = {
     }
 }
 ```
+
 ## Start Cardinal Consumer Authentication
 
 In the context of this tutorial, the `Cardinal.start()` function was integrated inside the `bin.process` trigger to ensure BIN Detection initiates first, before `Cardinal.start()`.
