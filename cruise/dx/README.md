@@ -104,3 +104,71 @@ $testPayload = prepareJson();
 ```
 
 ### Handle the response
+
+We will build a simple HTML form to submit the request and handle the response.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+</head>
+<body>
+<div id="" style="margin:3% 15%;">
+	<div class="card">
+	  <div class="card-header">
+	    Cardinal Cruise
+	  </div>
+	  <div class="card-body">
+	    <h5 class="card-title">BIN Intelligence API</h5>
+	    <p id="theBod"></p>
+	    <p><pre id="thePre" style="font-size: xx-small; white-space: pre-wrap; word-break: break-word"></pre></p>
+	    <p id="resStatus"></p>
+	    <p><pre id="resPre" style="font-size: xx-small; white-space: pre-wrap; word-break: break-word"></pre></p>
+	    <form>
+	    	<!--
+	    	<label for="bin">Bin:</label>
+	    	<p><input type="text" class="input-control col-md-4 disabled" id="bin" placeholder="<?php echo $bin ?>"></p>
+	    	<p></p>-->
+	    	<a href="#" class="btn btn-primary btn-block" onclick="binStuff();">Send BIN</a>
+	    </form>
+	  </div>
+	</div>
+</div>
+
+</body>
+<script>
+	function binStuff(){
+		//var bin = document.getElementById('bin').value;
+		var foo = '<?php print_r(json_encode($testPayload)); ?>';
+		document.getElementById('theBod').innerHTML = "JSON to be posted to BIN Intelligence:";
+		document.getElementById('thePre').innerHTML = foo;
+		document.getElementById('thePre').classList.add('alert','alert-success');
+		jQuery.ajax({
+			async:false,
+			contentType: "application/json",
+		  	timeout:10000,
+		  	type:"POST",
+		  	url:"https://geostag.cardinalcommerce.com/DeviceFingerprintWeb/V2/Server/Bin/Load",
+		  	data:foo
+		})
+		.done(function(response){
+		  		document.getElementById('resStatus').innerHTML = "BIN Intelligence response:";
+		  		document.getElementById('resPre').classList.add('alert','alert-success');
+		  		document.getElementById('resPre').innerHTML = response;
+		    	console.log('Response: %c'+response,'color:green; background-color:LightGreen;');
+		    	resParsed = JSON.parse(response);
+		    	ddcUrl = resParsed.Payload.DeviceDataCollectionUrl;
+		    	refId = 'ReferenceId='+resParsed.Payload.ReferenceId;
+		    	console.log(refId);
+		  	})
+		console.log('JSON request is: %c' +foo, "color:green; background-color:LightGreen");
+	}
+</script>
+</html>
+```
