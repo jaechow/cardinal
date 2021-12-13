@@ -3,6 +3,8 @@
 </p>
 
 ![Watchers](https://img.shields.io/github/watchers/jaechow/cardinal.svg)
+![Commits](https://img.shields.io/github/commit-activity/m/jaechow/cardinal/main)
+![Last Commit](https://img.shields.io/github/last-commit/jaechow/cardinal/main)
 [![GitHub Issues](https://img.shields.io/github/issues/jaechow/cardinal.svg)](https://github.com/jaechow/cardinal/issues)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
