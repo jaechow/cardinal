@@ -1,8 +1,16 @@
 <h1>cmpi_lookup APIKey Signature</h1>
 
+![php](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![Watchers](https://img.shields.io/github/watchers/jaechow/cardinal.svg)
+
 __Contents:__
 
-[TOC]
+<p align="center">
+    <a href="#apikey-signature-introduction">Introduction</a> •
+    <a href="#generating-a-timestamp">Generating a Timestamp</a> •
+    <a href="#generating-a-signature-value">Generating a Signature</a> •
+    <a href="#testing-apikey-signature">Testing APIKey Signature</a>
+</p>
 
 ## APIKey Signature Introduction ##
 
@@ -132,7 +140,3 @@ curl_close ($ch);
 echo $result;
 ?>
 ```
-
-
-
-
