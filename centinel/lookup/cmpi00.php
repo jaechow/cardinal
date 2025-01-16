@@ -1,57 +1,64 @@
 <?php
-header('Content-Type: text/plain');
-$Timestamp = round(microtime(true) * 1000);
-$ApiKey = '754be3dc-10b7-471f-af31-f20ce12b9ec1';
-$ApiId = '582e0a2033fadd1260f990f6';
-$OrgUnit = '582be9deda52932a946c45c4';
+require_once '../../vendor/autoload.php';
+require_once '../../data/config.php';
+$faker = Faker\Factory::create();
+ini_set('precision', 18);
+//header('Content-Type: text/plain');
+$Timestamps = round(microtime(true));
+$Timestamp = date_create()->format('Uv');
+$ApiKey = $cruise['ApiKey'];
+$ApiId = $cruise['ApiId'];
+$OrgUnit = $cruise['OrgUnit'];
 $preHash = $Timestamp.$ApiKey;
-$hashed = hash("sha256", $preHash, true);
+$hashed = hash("sha512", $preHash, true);
 $Signature = base64_encode($hashed);
+$expireYear = date("Y")+4;
+$refId = 'c17dea31-9cf6-0c1b8f2d3c5';
 $cmpi_lookup = <<<XML
 <CardinalMPI>
-    <Algorithm>SHA-256</Algorithm>
+    <Algorithm>SHA-512</Algorithm>
     <Amount>12345</Amount>
-    <BillAddrPostCode>44060</BillAddrPostCode>
-    <BillAddrState>OH</BillAddrState>
-    <BillingAddress1>8100 Tyler Blvd</BillingAddress1>
+    <BillAddrPostCode>$faker->postcode</BillAddrPostCode>
+    <BillAddrState>$faker->stateAbbr</BillAddrState>
+    <BillingAddress1>$faker->streetAddress</BillingAddress1>
     <BillingAddress2></BillingAddress2>
-    <BillingCity>Mentor</BillingCity>
+    <BillingCity>$faker->city</BillingCity>
     <BillingCountryCode>840</BillingCountryCode>
-    <BillingFirstName>John</BillingFirstName>
-    <BillingFullName>John Doe</BillingFullName>
-    <BillingLastName>Doe</BillingLastName>
+    <BillingFirstName>$faker->firstName</BillingFirstName>
+    <BillingLastName>$faker->lastName</BillingLastName>
     <BillingPostalCode>44060</BillingPostalCode>
-    <BillingState>OH</BillingState>
+    <BillingState>$faker->stateAbbr</BillingState>
     <BrowserColorDepth>32</BrowserColorDepth>
     <BrowserHeader>text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</BrowserHeader>
-    <BrowserHeader>text/html,application/xhtml+xml,application/xml;q=0.9,</BrowserHeader>
     <BrowserJavaEnabled>true</BrowserJavaEnabled>
-    <BrowserLanguage>English</BrowserLanguage>
+    <BrowserLanguage>en-US</BrowserLanguage>
     <BrowserScreenHeight>980</BrowserScreenHeight>
     <BrowserScreenWidth>1080</BrowserScreenWidth>
-    <BrowserTimeZone>25200</BrowserTimeZone>
+    <BrowserTimeZone>420</BrowserTimeZone>
     <CardExpMonth>02</CardExpMonth>
-    <CardExpYear>2024</CardExpYear>
+    <CardExpYear>$expireYear</CardExpYear>
     <CardNumber>4000000000001091</CardNumber>
     <CurrencyCode>840</CurrencyCode>
-    <DFReferenceId>c17dea31-9cf6-0c1b8f2d3c5</DFReferenceId>
+    <DFReferenceId>$refId</DFReferenceId>
     <DeviceChannel>browser</DeviceChannel>
-    <Email>cardinal.mobile.test@gmail.com</Email>
-    <IPAddress>67.17.219.20</IPAddress>
+    <Email>$faker->email</Email>
+    <IPAddress>$faker->ipv4</IPAddress>
     <Identifier>$ApiId</Identifier>
+    <MobilePhone>$faker->e164PhoneNumber</MobilePhone>
     <MsgType>cmpi_lookup</MsgType>
-    <OrderNumber>order-0001</OrderNumber>
+    <OrderNumber>$faker->uuid</OrderNumber>
     <OrgUnit>$OrgUnit</OrgUnit>
-    <ShippingAddress1>8100 Tyler Blvd</ShippingAddress1>
+    <ReturnUrl>https://postman-echo.com/post</ReturnUrl>
+    <ShippingAddress1>$faker->streetAddress</ShippingAddress1>
     <ShippingAddress2></ShippingAddress2>
-    <ShippingCity>44060</ShippingCity>
+    <ShippingCity>$faker->city</ShippingCity>
     <ShippingCountryCode>840</ShippingCountryCode>
-    <ShippingPostalCode>44060</ShippingPostalCode>
-    <ShippingState>OH</ShippingState>
+    <ShippingPostalCode>$faker->postcode</ShippingPostalCode>
+    <ShippingState>$faker->stateAbbr</ShippingState>
     <Signature>$Signature</Signature>
     <Timestamp>$Timestamp</Timestamp>
     <TransactionType>C</TransactionType>
-    <UserAgent>Mozilla/5.0 (Windows NT 6.1; WOW64; rv:30.0) Gecko/20100101 Firefox/30.0</UserAgent>
+    <UserAgent>$faker->userAgent()</UserAgent>
     <Version>1.7</Version>
 </CardinalMPI>
 XML;
@@ -68,6 +75,102 @@ curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 
 $result = curl_exec($ch);
 curl_close ($ch);
-echo $result;
+//echo $result;
+$xmldata = simplexml_load_string($result);
+$jsondata = json_encode($xmldata);
+$json = json_decode($jsondata,TRUE);
+//print_r($jsondata);
+$acsUrl = $json['ACSUrl'];
+$payload = $json['Payload'];
+$trxId = $json['TransactionId'];
+
+//echo $cmpi_lookup;
+
+function base64url_encode($input) {
+ return rtrim(strtr(base64_encode($input), '+/', '-_'), '='); 
+}
+
+function base64url_decode($input) {
+ return base64_decode(str_pad(strtr($input, '-_', '+/'), strlen($input) + (4 - strlen($input) % 4) % 4, '=', STR_PAD_RIGHT));
+}
+//build jwt headers
+$headers = ['alg'=>'HS256','typ'=>'JWT'];
+$headers_encoded = base64url_encode(json_encode($headers));
+//build jwt payload
+$jwt = ['jti'=>$trxId,'iat'=>$Timestamps, 'iss'=>$ApiId, 'OrgUnitId'=>$OrgUnit, 'ObjectifyPayload'=>true,  'Payload'=>['ACSUrl'=>$acsUrl, 'Payload'=>$payload,'TransactionId'=>$trxId],'ReferenceId'=>$refId,'ReturnUrl'=>'https://postman-echo.com/post'];
+
+$jwt_encoded = base64url_encode(json_encode($jwt));
+//build jwt signature
+$key = $ApiKey;
+$signature = hash_hmac('sha256',"$headers_encoded.$jwt_encoded",$key,true);
+$signature_encoded = base64url_encode($signature);
+
+//build and return the token
+$token = "$headers_encoded.$jwt_encoded.$signature_encoded";
+//echo $token;
+$url = 'https://centinelapistag.cardinalcommerce.com/V2/Cruise/StepUp';
 
 ?>
+
+<HTML>
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+</head>
+<pre id="response"></pre>
+<pre id="payload"></pre>
+<pre><?php echo $token ?></pre>
+<iframe name="challenge-iframe" height="100%" width="100%" style="display: block;border-style:none;">
+</iframe>
+
+<form id="challenge-form" target="challenge-iframe" method="POST" action="<?php echo $url ?>">
+<input type="hidden" name="JWT" value="<?php echo $token ?>" />
+</form>
+<script>
+    var response = <?php echo $jsondata ?>;
+    var payload = <?php echo json_encode($jwt) ?>;
+    document.getElementById("response").textContent = JSON.stringify(response, undefined, 2);
+    document.getElementById("payload").textContent = JSON.stringify(payload, undefined, 2);
+</script>
+<script>window.onload = function () {
+      // Auto submit form on page load
+      document.getElementById('challenge-form').submit();
+    }
+    const cruiseApiOrigin = 'https://centinelapistag.cardinalcommerce.com'
+    /**
+     * NOTE: This event binding will not work in older IE browsers.
+     * You will need to also implement attachEvent if you need to support older IE browsers.
+     * https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#legacy_internet_explorer_and_attachevent
+     **/
+    window.addEventListener('message', (evnt) => {
+      try {
+        // Filter postMessage events by origin and process only the Cardinal events
+        if (evnt.origin === cruiseApiOrigin) {
+          // CruiseAPI events are stringified JSON objects to ensure backwards compatibility with older browsers
+          let data = JSON.parse(evnt.data)
+          if (data !== undefined && data.MessageType !== undefined) {
+            // Do merchant logic
+            switch(data.MessageType)
+            {
+              case 'stepUp.acsRedirection':
+                // Implement Merchant logic
+                break;
+              case 'stepUp.completion':
+                // Implement Merchant logic
+                break;
+              case 'stepUp.error':
+                // Implement Merchant logic
+                break;
+              default:
+                console.error("Unknown MessageType found ["+data.MessageType+"]");
+                // Implement Merchant logic - Handle unknown MessageType
+                break;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('failed to parse CruiseAPI postMessage event', e)
+      }
+    }, false)
+</script>
+</HTML>
+

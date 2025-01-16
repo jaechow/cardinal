@@ -1,4 +1,4 @@
-<h1>cmpi_lookup APIKey Signature</h1>
+<h1>3DS Authentication cmpi_lookup</h1>
 
 ![php](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![Watchers](https://img.shields.io/github/watchers/jaechow/cardinal.svg)
@@ -9,14 +9,12 @@ __Contents:__
     <a href="#apikey-signature-introduction">Introduction</a> •
     <a href="#generating-a-timestamp">Generating a Timestamp</a> •
     <a href="#generating-a-signature-value">Generating a Signature</a> •
-    <a href="#testing-apikey-signature">Testing APIKey Signature</a>
+    <a href="#cmpi_lookup-request-structure">cmpi_lookup Request Structure</a>
 </p>
 
 ## APIKey Signature Introduction ##
 
-Centinel now supports a more secure means of submitting requests using a combination of an API Key and the current timestamp.  This new method replaces the need to include: `MerchantId`, `ProcessorId` and `TransactionPwd` in the lookup and authenticate requests.  Instead, the lookup and authenticate requests will contain: `Algorithm`, `Identifier`, `OrgUnit`, `Signature` and `Timestamp`.
-
->NOTE: Authenticating to Centinel with APIKey Signature on the lookup requires also authententicating with APIKey Signature on the authenticate request.
+Centinel lookup requests will utilize the following credentials to authenticate: `Algorithm`, `Identifier`, `OrgUnit`, `Signature` and `Timestamp`.
 
 | Field Name | Description | Required |
 | :-- | :-- | :--: |
@@ -49,7 +47,7 @@ For Example:
 $timestamp = round(microtime(true) * 1000);
 $apiKey = '13f1fd1b-ab2d-4c1f-8e2c-ca61878f2a44';
 
-# Now, concatenate the two like:
+# Now, concatenate the two values:
 $preHash = $timestamp.$apiKey;
 
 # Next, hash the concatenated value.
@@ -62,9 +60,9 @@ $signature = base64_encode($hashed);
 ?>
 ```
 
-## Testing APIKey Signature ##
+## cmpi_lookup Request Structure ##
 
-The following example will help provide a conceptual demonstration of the cmpi_lookup with APIKey Signature and its complimentary fields
+The following example will help provide a conceptual demonstration of generating the APIKey Signature and the cmpi_lookup schema
 
 ```PHP
 <?php
@@ -138,5 +136,108 @@ curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 $result = curl_exec($ch);
 curl_close ($ch);
 echo $result;
+```
+Next, the following PHP parses the results to populate the Challenge iFrame
+
+```PHP
+$xmldata = simplexml_load_string($result);
+$jsondata = json_encode($xmldata);
+$json = json_decode($jsondata,TRUE);
+$acsUrl = $json['ACSUrl'];
+$payload = $json['Payload'];
+$trxId = $json['TransactionId'];
+
+function base64url_encode($input) {
+ return rtrim(strtr(base64_encode($input), '+/', '-_'), '='); 
+}
+
+function base64url_decode($input) {
+ return base64_decode(str_pad(strtr($input, '-_', '+/'), strlen($input) + (4 - strlen($input) % 4) % 4, '=', STR_PAD_RIGHT));
+}
+
+//build jwt headers
+$headers = ['alg'=>'HS256','typ'=>'JWT'];
+$headers_encoded = base64url_encode(json_encode($headers));
+//build jwt payload
+$jwt = ['jti'=>$trxId,'iat'=>$Timestamps, 'iss'=>$ApiId, 'OrgUnitId'=>$OrgUnit, 'ObjectifyPayload'=>true,  'Payload'=>['ACSUrl'=>$acsUrl, 'Payload'=>$payload,'TransactionId'=>$trxId],'ReferenceId'=>$refId,'ReturnUrl'=>'https://postman-echo.com/post'];
+
+$jwt_encoded = base64url_encode(json_encode($jwt));
+//build jwt signature
+$key = $ApiKey;
+$signature = hash_hmac('sha256',"$headers_encoded.$jwt_encoded",$key,true);
+$signature_encoded = base64url_encode($signature);
+
+//build and return the token
+$token = "$headers_encoded.$jwt_encoded.$signature_encoded";
+//echo $token;
+$url = 'https://centinelapistag.cardinalcommerce.com/V2/Cruise/StepUp';
 ?>
+```
+
+Last, construct the Challenge iFrame
+
+```HTML
+
+<HTML>
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+</head>
+<pre id="response"></pre>
+<pre id="payload"></pre>
+<pre><?php echo $token ?></pre>
+<iframe name="challenge-iframe" height="100%" width="100%" style="display: block;border-style:none;">
+</iframe>
+
+<form id="challenge-form" target="challenge-iframe" method="POST" action="<?php echo $url ?>">
+<input type="hidden" name="JWT" value="<?php echo $token ?>" />
+</form>
+<script>
+    var response = <?php echo $jsondata ?>;
+    var payload = <?php echo json_encode($jwt) ?>;
+    document.getElementById("response").textContent = JSON.stringify(response, undefined, 2);
+    document.getElementById("payload").textContent = JSON.stringify(payload, undefined, 2);
+</script>
+<script>window.onload = function () {
+      // Auto submit form on page load
+      document.getElementById('challenge-form').submit();
+    }
+    const cruiseApiOrigin = 'https://centinelapistag.cardinalcommerce.com'
+    /**
+     * NOTE: This event binding will not work in older IE browsers.
+     * You will need to also implement attachEvent if you need to support older IE browsers.
+     * https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#legacy_internet_explorer_and_attachevent
+     **/
+    window.addEventListener('message', (evnt) => {
+      try {
+        // Filter postMessage events by origin and process only the Cardinal events
+        if (evnt.origin === cruiseApiOrigin) {
+          // CruiseAPI events are stringified JSON objects to ensure backwards compatibility with older browsers
+          let data = JSON.parse(evnt.data)
+          if (data !== undefined && data.MessageType !== undefined) {
+            // Do merchant logic
+            switch(data.MessageType)
+            {
+              case 'stepUp.acsRedirection':
+                // Implement Merchant logic
+                break;
+              case 'stepUp.completion':
+                // Implement Merchant logic
+                break;
+              case 'stepUp.error':
+                // Implement Merchant logic
+                break;
+              default:
+                console.error("Unknown MessageType found ["+data.MessageType+"]");
+                // Implement Merchant logic - Handle unknown MessageType
+                break;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('failed to parse CruiseAPI postMessage event', e)
+      }
+    }, false)
+</script>
+</HTML>
+
 ```
