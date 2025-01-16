@@ -11,12 +11,12 @@
 
 # Cardinal Commerce
 
->Test lab for the development of Cardinal APIs including Cardinal Cruise and Centinel
+> Test lab for the development of Cardinal APIs including Cardinal Cruise and Centinel
 
 # Navigation
 
 <p align="center">
-<a href="cruise/dx/">Cardinal Cruise BIN Intelligence API</a> •
+<a href="cruise/dx/">Cardinal Cruise Data Exchange API</a> •
 <a href="centinel/lookup/">Centinel Lookup Message</a> •
 <a href="cruise/standard/">Cardinal Cruise Standard Tutorial</a>
 </p>

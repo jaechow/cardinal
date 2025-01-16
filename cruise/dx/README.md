@@ -139,11 +139,11 @@ eyJraWQiOiJkYXRhZXhjaGFuZ2UtcGtlLW1waS1jYy0yMDQ4c2hhMi1wcm9kLTIwMjMiLCJlbmMiOiJB
    ```bash
    git clone https://github.com/jaechow/cardinal.git
    ```
-2. Navigate to the project directory:
+2. Review and update configurations for API integration in `data/config.php`.
+3. Navigate to the project directory:
    ```bash
    cd cardinal/cruise/dx
    ```
-3. Review and update configurations for API integration in `data/config.php`.
 4. Run the sample scripts to test API interactions:
    ```bash
    php -S localhost:3000
