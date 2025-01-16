@@ -1,13 +1,14 @@
 <?php
 require_once '../../vendor/autoload.php';
+require_once '../../data/config.php';
 $faker = Faker\Factory::create();
 ini_set('precision', 18);
 //header('Content-Type: text/plain');
 $Timestamps = round(microtime(true));
 $Timestamp = date_create()->format('Uv');
-$ApiKey = '754be3dc-10b7-471f-af31-f20ce12b9ec1';
-$ApiId = '582e0a2033fadd1260f990f6';
-$OrgUnit = '582be9deda52932a946c45c4';
+$ApiKey = $cruise['ApiKey'];
+$ApiId = $cruise['ApiId'];
+$OrgUnit = $cruise['OrgUnit'];
 $preHash = $Timestamp.$ApiKey;
 $hashed = hash("sha512", $preHash, true);
 $Signature = base64_encode($hashed);
