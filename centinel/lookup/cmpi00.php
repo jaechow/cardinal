@@ -96,9 +96,10 @@ function base64url_decode($input) {
 //build jwt headers
 $headers = ['alg'=>'HS256','typ'=>'JWT'];
 $headers_encoded = base64url_encode(json_encode($headers));
-//build jwt payload
-$jwt = ['jti'=>$trxId,'iat'=>$Timestamps, 'iss'=>$ApiId, 'OrgUnitId'=>$OrgUnit, 'ObjectifyPayload'=>true,  'Payload'=>['ACSUrl'=>$acsUrl, 'Payload'=>$payload,'TransactionId'=>$trxId],'ReferenceId'=>$refId,'ReturnUrl'=>'https://postman-echo.com/post'];
-
+//build jwt payload (for postMessage)
+$jwt = ['jti'=>$trxId,'iat'=>$Timestamps, 'iss'=>$ApiId, 'OrgUnitId'=>$OrgUnit, 'ObjectifyPayload'=>true,  'Payload'=>['ACSUrl'=>$acsUrl, 'Payload'=>$payload,'TransactionId'=>$trxId],'ReferenceId'=>$refId];
+/* to use jwt for returnUrl, comment-out the above $jwt and uncomment the following */
+//$jwt = ['jti'=>$trxId,'iat'=>$Timestamps, 'iss'=>$ApiId, 'OrgUnitId'=>$OrgUnit, 'ObjectifyPayload'=>true,  'Payload'=>['ACSUrl'=>$acsUrl, 'Payload'=>$payload,'TransactionId'=>$trxId],'ReferenceId'=>$refId, 'ReturnUrl'=>'https://postman-echo.com/post'];
 $jwt_encoded = base64url_encode(json_encode($jwt));
 //build jwt signature
 $key = $ApiKey;
@@ -115,12 +116,52 @@ $url = 'https://centinelapistag.cardinalcommerce.com/V2/Cruise/StepUp';
 <HTML>
 <head>
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <style>
+      .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 60%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+        }
+    </style>
+    <script>
+        function openModal() {
+            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('modalContent').style.display = 'block';
+        }
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('modalContent').style.display = 'none';
+        }
+    </script>
 </head>
 <pre id="response"></pre>
 <pre id="payload"></pre>
 <pre><?php echo $token ?></pre>
-<iframe name="challenge-iframe" height="100%" width="100%" style="display: block;border-style:none;">
-</iframe>
+<div id="modal" class="modal">
+        <div id="modalContent" class="modal-content">
+            <iframe name="challenge-iframe" id="challenge-iframe" height="100%" width="100%" style="visibility: hidden; border: 0;">
+            </iframe>
+            <button class="close-button" onclick="closeModal()">Close</button>
+        </div>
+</div>
 
 <form id="challenge-form" target="challenge-iframe" method="POST" action="<?php echo $url ?>">
 <input type="hidden" name="JWT" value="<?php echo $token ?>" />
@@ -152,13 +193,20 @@ $url = 'https://centinelapistag.cardinalcommerce.com/V2/Cruise/StepUp';
             switch(data.MessageType)
             {
               case 'stepUp.acsRedirection':
-                // Implement Merchant logic
+                console.log('%cEvent: '+data.MessageType,'color:purple; background-color:Orange');
+                openModal();
+                document.getElementById('challenge-iframe').style.visibility = "visible";
                 break;
               case 'stepUp.completion':
-                // Implement Merchant logic
+                console.log('%cEvent: '+data.MessageType,'color:green; background-color:LightGreen');
+                closeModal();
+                document.getElementById('challenge-iframe').style.visibility = "hidden";
+                console.log('%cTransaction ID: '+data.TransactionId,'color:green; background-color:LightGreen');
                 break;
               case 'stepUp.error':
-                // Implement Merchant logic
+                console.log(data.MessageType);
+                closeModal();
+                document.getElementById('challenge-iframe').style.visibility = "hidden";
                 break;
               default:
                 console.error("Unknown MessageType found ["+data.MessageType+"]");
