@@ -159,7 +159,6 @@ $url = 'https://centinelapistag.cardinalcommerce.com/V2/Cruise/StepUp';
         <div id="modalContent" class="modal-content">
             <iframe name="challenge-iframe" id="challenge-iframe" height="100%" width="100%" style="visibility: hidden; border: 0;">
             </iframe>
-            <button class="close-button" onclick="closeModal()">Close</button>
         </div>
 </div>
 
